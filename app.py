@@ -49,7 +49,10 @@ def principal():
 
 @app.route('/buscador', methods=['GET'])
 def buscador():
-    return render_template('buscador.html', message=f"Indique el producto a buscar: ")
+    if 'usuario' in session:
+        return render_template('buscador.html', message=f"Indique el producto a buscar: ")
+    
+    return render_template('login.html', message="Debe iniciar sesión para acceder.")
 
 @app.route('/api/buscar_producto', methods=['POST'])
 def buscar_producto():
@@ -63,7 +66,7 @@ def buscar_producto():
         data = cursor.fetchone()
         cursor.close()
         conn.close()
-        
+
         if data:
             return jsonify(data)
         else:
