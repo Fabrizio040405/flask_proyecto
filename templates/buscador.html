@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Buscador </title>
+    <style>
+        *{
+            background-color: black;
+            color:white
+        }
+        button{
+            border-color: aqua;
+        }
+        table{
+            border-color: aqua;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1>{{ message }}</h1>
+        <br>
+        <form action="/api/buscar_producto" method="post">
+            <table align="center" border = "5">
+                <tr>
+                    <td>Id producto :</td>
+                    <td><input type="text" name="producto" required></td>
+                    <td><button type="submit"> Buscar </button></td>
+                </tr>
+            </table>
+        </form>
+    </center>
+</body>
+</html>

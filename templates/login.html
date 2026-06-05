@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        *{
+            background-color: black;
+            color:white
+        }
+        button{
+            border-color: aqua;
+        }
+        input{
+            background-color: rgb(66, 66, 66);
+            color: white;
+            border-color: aqua;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h2>INICIAR SESIÓN</h2>
+        <form action="/login" method="POST">
+            <table>
+                <tr>
+                    <td>Username: </td>
+                    <td><input type="text" name="username" required></td>
+                </tr>
+                <tr>
+                    <td>Password: </td>
+                    <td><input type="password" name="password" required></td>
+                </tr>
+            </table>
+            <br>
+            <button type="submit">Iniciar sesión</button>
+        </form>
+        
+        <h3>{{ message }}</h3>
+    </center>
+</body>
+</html>
