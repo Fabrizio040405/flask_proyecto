@@ -21,22 +21,24 @@ def validar_user(username : str , password : str) -> bool:
 @app.route('/', methods=['GET'])
 def index():
     session.clear() # Limpia la sesión
-    return redirect(url_for('login'))
+    return render_template('login.html', message="Bienvenido, indique su usuario y contraseña")
 
 @app.route('/login', methods=['POST','GET'])
 def login():
+    if request.method == 'GET':
+        return redirect(url_for('login'))
+
     username = request.form.get('username')
     password = request.form.get('password')
 
+    # Aquí está la lógica de validación de usuario y contraseña
     validar = validar_user(username, password)
 
     if validar:
         session['usuario'] = username
-        # Si es correcto, lo mandamos a la ventana principal en Vercel
-        return redirect('https://flask-proyecto-two.vercel.app/principal.html')
+        return redirect(url_for('principal'))
     
-    # Si falla, lo devolvemos al login de Vercel pero con un aviso de error en la URL
-    return redirect('https://flask-proyecto-two.vercel.app/login.html?error=1')
+    return render_template('login.html', message="Usuario o contraseña incorrectas")
 
 @app.route('/principal', methods=['GET'])
 def principal():
