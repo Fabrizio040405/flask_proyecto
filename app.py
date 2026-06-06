@@ -21,7 +21,7 @@ def validar_user(username : str , password : str) -> bool:
 @app.route('/', methods=['GET'])
 def index():
     session.clear() # Limpia la sesión
-    return render_template('login.html', message="Bienvenido, indique su usuario y contraseña")
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['POST','GET'])
 def login():
