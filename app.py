@@ -26,7 +26,7 @@ def index():
 @app.route('/login', methods=['POST','GET'])
 def login():
     if request.method == 'GET':
-        return redirect(url_for('login'))
+        return render_template('login.html', message="Bienvenido, indique su usuario y contraseña")
 
     username = request.form.get('username')
     password = request.form.get('password')
