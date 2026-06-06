@@ -5,24 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Buscador </title>
     <style>
-        *{
-            background-color: black;
-            color:white
-        }
-        button{
-            border-color: aqua;
-        }
-        table{
-            border-color: aqua;
-        }
+        *{ background-color: black; color:white }
+        button{ border-color: aqua; padding: 5px 10px; margin: 5px; cursor: pointer; }
+        table{ border-color: aqua; margin-top: 15px; }
+        #resultado { margin-top: 20px; }
     </style>
 </head>
 <body>
     <center>
-        <h1>{{ message }}</h1>
+        <h1>Indique el producto a buscar:</h1>
         <br>
-        <form action="https://flask-proyecto-examen-parcial.onrender.com/api/buscar_producto" method="post">
-            <table align="center" border = "5">
+        
+        <form id="form-buscador">
+            <table align="center" border="5">
                 <tr>
                     <td>Id producto :</td>
                     <td><input type="text" name="producto" required></td>
@@ -30,6 +25,58 @@
                 </tr>
             </table>
         </form>
+
+        <div id="resultado"></div>
+        
+        <br><br>
+        <button onclick="window.location.href='principal.html'">Regresar al Menú</button>
+
     </center>
+
+    <script>
+        // 1. Proteger la ruta: Si no hay sesión, lo pateamos al login
+        const usuario = localStorage.getItem("usuarioActivo");
+        if (!usuario) {
+            window.location.href = "login.html";
+        }
+
+        // 2. Lógica de búsqueda con fetch()
+        document.getElementById('form-buscador').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evitamos que la página salte a Render
+
+            const formData = new FormData(this);
+            // URL de tu API en Render
+            const url_render = "https://flask-proyecto-examen-parcial.onrender.com/api/buscar_producto";
+            const divResultado = document.getElementById("resultado");
+
+            divResultado.innerHTML = "<h3 style='color: yellow;'>Buscando...</h3>";
+
+            try {
+                const respuesta = await fetch(url_render, { method: 'POST', body: formData });
+                const datos = await respuesta.json();
+
+                if (datos.error) {
+                    // Si el backend manda un error (ej. "Producto no encontrado")
+                    divResultado.innerHTML = `<h3 style="color: red;">${datos.error}</h3>`;
+                } else {
+                    // Si trae datos, los mostramos en una tablita
+                    // datos[1] es el código, datos[2] es el nombre, datos[4] es el precio, etc. (según tu SQLite)
+                    divResultado.innerHTML = `
+                        <h3 style="color: lime;">¡Producto Encontrado!</h3>
+                        <table border="1">
+                            <tr><th>Código</th><td>${datos[1]}</td></tr>
+                            <tr><th>Nombre</th><td>${datos[2]}</td></tr>
+                            <tr><th>Descripción</th><td>${datos[3]}</td></tr>
+                            <tr><th>Precio</th><td>S/ ${datos[4]}</td></tr>
+                            <tr><th>Stock</th><td>${datos[5]} unidades</td></tr>
+                            <tr><th>Categoría</th><td>${datos[6]}</td></tr>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                divResultado.innerHTML = `<h3 style="color: red;">Error conectando al servidor.</h3>`;
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,15 +1,12 @@
-from flask import Flask, request, render_template, url_for, redirect, session, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
 
 app = Flask(__name__)
+# El CORS es lo que permite que Vercel se pueda comunicar con Render
+CORS(app) 
 
-CORS(app)
-
-app.secret_key = 'Contraseña' # Se debe crear ya que no te permite utilizar
-                              # el sesión sin esta clave.  
-
-def validar_user(username : str , password : str) -> bool:
+def validar_user(username, password):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM usuarios WHERE username=? AND password=?", (username, password))
@@ -18,50 +15,26 @@ def validar_user(username : str , password : str) -> bool:
     conn.close()
     return True if user else False
 
-@app.route('/', methods=['GET'])
-def index():
-    session.clear() # Limpia la sesión
-    return render_template('login.html', message="Bienvenido, indique su usuario y contraseña")
-
-@app.route('/login', methods=['POST','GET'])
-def login():
-    if request.method == 'GET':
-        return redirect(url_for('login'))
-
+# Endpoint de Login (Devuelve JSON)
+@app.route('/api/login', methods=['POST'])
+def api_login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    # Aquí está la lógica de validación de usuario y contraseña
-    validar = validar_user(username, password)
-
-    if validar:
-        session['usuario'] = username
-        return redirect(url_for('principal'))
+    if validar_user(username, password):
+        return jsonify({"status": "exito", "usuario": username})
     
-    return render_template('login.html', message="Usuario o contraseña incorrectas")
+    return jsonify({"status": "error", "mensaje": "Usuario o contraseña incorrectas"}), 401
 
-@app.route('/principal', methods=['GET'])
-def principal():
-    if 'usuario' in session:
-            return render_template('principal.html', message=f"Bienvenido {session['usuario']} a la página principal")
-    
-    return render_template('login.html', message="Debe iniciar sesión para acceder.")
-
-@app.route('/buscador', methods=['GET'])
-def buscador():
-    if 'usuario' in session:
-        return render_template('buscador.html', message=f"Indique el producto a buscar: ")
-    
-    return render_template('login.html', message="Debe iniciar sesión para acceder.")
-
+# Endpoint del Buscador (Devuelve JSON)
 @app.route('/api/buscar_producto', methods=['POST'])
 def buscar_producto():
     codigo = request.form.get('producto')
 
     if codigo and len(codigo) == 4:
-
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
+        # Recuerda que esto devuelve todos los registros que coincidan, no un subset filtrado adicionalmente
         cursor.execute("SELECT * FROM productos WHERE codigo=?", (codigo,))
         data = cursor.fetchone()
         cursor.close()
@@ -70,14 +43,9 @@ def buscar_producto():
         if data:
             return jsonify(data)
         else:
-            return jsonify({"error": "Producto no encontrado."})
+            return jsonify({"error": "Producto no encontrado."}), 404
 
-    return jsonify({"error": "El codigo del producto debe tener 4 caracteres."})
-
-@app.route('/logout', methods=['GET'])
-def logout():
-    session.clear() # Limpia la sesión
-    return redirect(url_for('index'))
+    return jsonify({"error": "El codigo del producto debe tener 4 caracteres."}), 400
 
 if __name__ == '__main__':
     app.run(debug=True, port=10000)

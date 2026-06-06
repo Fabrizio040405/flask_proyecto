@@ -21,8 +21,8 @@
 </head>
 <body>
     <center>
-        <h2>INICIAR SESIÓN</h2>
-        <form action="https://flask-proyecto-examen-parcial.onrender.com/login" method="POST">
+        <h3 id="mensaje-pantalla">Bienvenido, indique su usuario y contraseña</h3>
+        <form id="form-login">
             <table>
                 <tr>
                     <td>Username: </td>
@@ -36,8 +36,33 @@
             <br>
             <button type="submit">Iniciar sesión</button>
         </form>
-        
-        <h3>{{ message }}</h3>
+
+        <script>
+            document.getElementById('form-login').addEventListener('submit', async function(event) {
+                event.preventDefault(); // Evitamos que la página se recargue
+
+                const formData = new FormData(this);
+                // Aquí va la URL exacta de tu Render apuntando a /api/login
+                const url_render = "https://flask-proyecto-examen-parcial.onrender.com/api/login";
+
+                try {
+                    const respuesta = await fetch(url_render, { method: 'POST', body: formData });
+                    const datos = await respuesta.json();
+
+                    if (datos.status === "exito") {
+                        // Guardamos el usuario de forma segura en Vercel
+                        localStorage.setItem("usuarioActivo", datos.usuario);
+                        // Viajamos a la página principal
+                        window.location.href = "principal.html"; 
+                    } else {
+                        document.getElementById("mensaje-pantalla").innerText = datos.mensaje;
+                        document.getElementById("mensaje-pantalla").style.color = "red";
+                    }
+                } catch (error) {
+                    document.getElementById("mensaje-pantalla").innerText = "Error conectando al servidor.";
+                }
+            });
+        </script>
     </center>
 </body>
 </html>

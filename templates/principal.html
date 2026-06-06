@@ -2,32 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principal</title>
     <style>
-        *{
-            background-color: black;
-            color:white
-        }
-        button{
-            size: 20px;
-            border-color: aqua
-        }
-        body{
-            align-content: center;
-        }
+        *{ background-color: black; color:white }
+        button{ border-color: aqua }
     </style>
 </head>
 <body>
     <center>
-    <form action="https://flask-proyecto-examen-parcial.onrender.com/buscador" method="get">
-        <h1>{{ message }}</h1>
-        <button type="submit">Buscador</button>
-    </form>
-    <br>
-    <form action="https://flask-proyecto-examen-parcial.onrender.com/logout" method="get">
-        <button type="submit">Cerrar Sesión</button>
-    </form>
+        <h1 id="bienvenida">Cargando...</h1>
+        <br>
+        
+        <button onclick="window.location.href='buscador.html'">Buscador</button>
+        <br><br>
+        <button onclick="cerrarSesion()">Cerrar Sesión</button>
     </center>
+
+    <script>
+        // 1. Verificamos si existe una sesión activa
+        const usuario = localStorage.getItem("usuarioActivo");
+        
+        if (!usuario) {
+            // Si intenta entrar como intruso, lo devolvemos al login
+            window.location.href = "login.html";
+        } else {
+            // Le damos la bienvenida
+            document.getElementById("bienvenida").innerText = `Bienvenido ${usuario} a la página principal`;
+        }
+
+        // 2. Función para salir
+        function cerrarSesion() {
+            localStorage.removeItem("usuarioActivo"); // Destruimos la sesión
+            window.location.href = "login.html"; // Regresamos al inicio
+        }
+    </script>
 </body>
 </html>
