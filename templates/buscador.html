@@ -3,88 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Buscador </title>
+    <title>Buscador</title>
     <style>
-        *{
-            background-color: black;
-            color:white
-        }
-        button{
-            border-color: aqua;
-        }
-        table{
-            border-color: aqua;
-            margin-top: 15px;
-        }
-        #tabla-resultado {
-            margin-top: 20px;
-        }
+        *{ background-color: black; color:white }
+        button{ border-color: aqua; cursor: pointer; }
+        table{ border-color: aqua; }
     </style>
 </head>
 <body>
     <center>
-        <h1 id="msg-buscador">{{ message }}</h1>
+        <h1>Indique el producto a buscar:</h1>
         <br>
-        <form id="form-buscar-producto">
-            <table align="center" border = "5">
+        <form id="formBuscador">
+            <table align="center" border="5">
                 <tr>
                     <td>Id producto :</td>
-                    <td><input type="text" name="producto" required></td>
-                    <td><button type="submit"> Buscar </button></td>
+                    <td><input type="text" id="productoInput" required></td>
+                    <td><button type="submit">Buscar</button></td>
                 </tr>
             </table>
         </form>
 
-        <div id="tabla-resultado"></div>
+        <div id="resultado" style="margin-top: 20px;"></div>
         
         <br>
-        <button onclick="window.location.href='https://flask-proyecto-examen-parcial.onrender.com/principal'">Regresar</button>
+        <button onclick="window.location.href='principal.html'">Regresar</button>
     </center>
 
     <script>
-        // Corrección del texto base en entornos estáticos
-        window.addEventListener('DOMContentLoaded', () => {
-            const el = document.getElementById('msg-buscador');
-            if (el && el.innerText.includes('{{')) {
-                el.innerText = "Indique el producto a buscar: ";
-            }
-        });
+        // Seguridad: revisar si está logueado
+        if (!localStorage.getItem("usuarioLogueado")) {
+            window.location.href = "login.html";
+        }
 
-        // Intercepta el formulario para procesarlo mediante la API JSON
-        document.getElementById('form-buscar-producto').addEventListener('submit', async function(e) {
-            e.preventDefault(); 
+        const BACKEND_URL = "https://flask-proyecto-gfax.onrender.com"; 
 
-            const formData = new FormData(this);
-            const contenedor = document.getElementById('tabla-resultado');
-            contenedor.innerHTML = "<p style='color: yellow;'>Buscando información...</p>";
+        document.getElementById('formBuscador').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('productoInput').value;
+            const cajaResultado = document.getElementById('resultado');
 
             try {
-                const response = await fetch('https://flask-proyecto-examen-parcial.onrender.com/api/buscar_producto', {
+                const response = await fetch(`${BACKEND_URL}/api/buscar_producto`, {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ producto: codigo })
                 });
+
                 const data = await response.json();
 
-                if (data.error) {
-                    // Muestra el mensaje de error estructurado en tu app.py
-                    contenedor.innerHTML = `<h3 style="color: red;">${data.error}</h3>`;
-                } else {
-                    // Dibuja la información del producto mapeando los índices del fetchone() de SQLite
-                    contenedor.innerHTML = `
-                        <h3 style="color: lime;">Producto encontrado con éxito</h3>
-                        <table border="5" align="center">
-                            <tr><th>Campo</th><th>Detalle</th></tr>
-                            <tr><td>Código</td><td>${data[1]}</td></tr>
-                            <tr><td>Nombre</td><td>${data[2]}</td></tr>
-                            <tr><td>Descripción</td><td>${data[3]}</td></tr>
-                            <tr><td>Precio</td><td>S/ ${data[4]}</td></tr>
-                            <tr><td>Stock</td><td>${data[5]} unidades</td></tr>
-                            <tr><td>Categoría</td><td>${data[6]}</td></tr>
-                        </table>
+                if (data.status === "ok") {
+                    const p = data.data;
+                    cajaResultado.innerHTML = `
+                        <h3>Producto encontrado:</h3>
+                        <p><b>Nombre:</b> ${p.nombre}</p>
+                        <p><b>Precio:</b> S/ ${p.precio}</p>
+                        <p><b>Stock:</b> ${p.stock}</p>
                     `;
+                } else {
+                    cajaResultado.innerHTML = `<h3 style="color:red">${data.message}</h3>`;
                 }
-            } catch (err) {
-                contenedor.innerHTML = "<h3 style='color: red;'>Error al conectar con la API del servidor.</h3>";
+            } catch (error) {
+                cajaResultado.innerHTML = `<h3 style="color:red">Error de conexión</h3>`;
             }
         });
     </script>

@@ -5,47 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
-        *{
-            background-color: black;
-            color:white
+        *{ 
+            background-color: black; 
+            color:white 
         }
-        button{
-            border-color: aqua;
+        button{ 
+            border-color: aqua; 
+            cursor: pointer; 
         }
-        input{
-            background-color: rgb(66, 66, 66);
-            color: white;
-            border-color: aqua;
+        input{ 
+            background-color: rgb(66, 66, 66); 
+            color: white; 
+            border-color: aqua; 
         }
     </style>
 </head>
 <body>
     <center>
         <h2>INICIAR SESIÓN</h2>
-        <form action="https://flask-proyecto-examen-parcial.onrender.com/login" method="POST">
+        <form id="formLogin">
             <table>
                 <tr>
                     <td>Username: </td>
-                    <td><input type="text" name="username" required></td>
+                    <td><input type="text" id="username" required></td>
                 </tr>
                 <tr>
                     <td>Password: </td>
-                    <td><input type="password" name="password" required></td>
+                    <td><input type="password" id="password" required></td>
                 </tr>
             </table>
             <br>
             <button type="submit">Iniciar sesión</button>
         </form>
         
-        <h3 id="msg-login">{{ message }}</h3>
+        <h3 id="mensaje"></h3>
     </center>
 
     <script>
-        // Si se ejecuta de forma estática en Vercel, limpia las llaves de Jinja2
-        window.addEventListener('DOMContentLoaded', () => {
-            const el = document.getElementById('msg-login');
-            if (el && el.innerText.includes('{{')) {
-                el.innerText = "Bienvenido, indique su usuario y contraseña";
+        // AQUI PONDRÁS LA URL DE TU BACKEND EN RENDER CUANDO LO SUBAS
+        const BACKEND_URL = "https://flask-proyecto-gfax.onrender.com"; 
+
+        document.getElementById('formLogin').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita que la página se recargue
+            
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const msjBox = document.getElementById('mensaje');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                const data = await response.json();
+
+                if (data.status === "ok") {
+                    // Guardamos el usuario en el navegador y pasamos de pantalla
+                    localStorage.setItem("usuarioLogueado", data.usuario);
+                    window.location.href = "principal.html"; 
+                } else {
+                    msjBox.innerText = data.message;
+                    msjBox.style.color = "red";
+                }
+            } catch (error) {
+                msjBox.innerText = "Error al conectar con el servidor.";
             }
         });
     </script>
