@@ -36,6 +36,7 @@
             window.location.href = "login.html";
         }
 
+        // Tu URL real de Render que vimos en la primera imagen
         const BACKEND_URL = "https://flask-proyecto-gfax.onrender.com"; 
 
         document.getElementById('formBuscador').addEventListener('submit', async (e) => {
@@ -53,19 +54,29 @@
 
                 const data = await response.json();
 
-                if (data.status === "ok") {
-                    const p = data.data;
+                // CASO 1: Si Python devuelve un error (ej. P004 no existe o no tiene 4 letras)
+                if (data.error) {
+                    cajaResultado.innerHTML = `<h3 style="color:red">${data.error}</h3>`;
+                } 
+                // CASO 2: Si Python devuelve el producto (tu app.py devuelve una lista de datos)
+                else if (Array.isArray(data)) {
                     cajaResultado.innerHTML = `
                         <h3>Producto encontrado:</h3>
-                        <p><b>Nombre:</b> ${p.nombre}</p>
-                        <p><b>Precio:</b> S/ ${p.precio}</p>
-                        <p><b>Stock:</b> ${p.stock}</p>
+                        <table align="center" border="1" style="border-color: aqua; width: 60%;">
+                            <tr><td><b>Código:</b></td><td>${data[1]}</td></tr>
+                            <tr><td><b>Nombre:</b></td><td>${data[2]}</td></tr>
+                            <tr><td><b>Descripción:</b></td><td>${data[3]}</td></tr>
+                            <tr><td><b>Precio:</b></td><td>S/ ${data[4]}</td></tr>
+                            <tr><td><b>Stock:</b></td><td>${data[5]}</td></tr>
+                            <tr><td><b>Categoría:</b></td><td>${data[6]}</td></tr>
+                        </table>
                     `;
                 } else {
-                    cajaResultado.innerHTML = `<h3 style="color:red">${data.message}</h3>`;
+                    cajaResultado.innerHTML = `<h3 style="color:red">Error procesando los datos.</h3>`;
                 }
             } catch (error) {
-                cajaResultado.innerHTML = `<h3 style="color:red">Error de conexión</h3>`;
+                cajaResultado.innerHTML = `<h3 style="color:red">Error de conexión con el servidor.</h3>`;
+                console.error(error);
             }
         });
     </script>
